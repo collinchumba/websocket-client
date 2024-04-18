@@ -1,23 +1,62 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import SockJsClient from 'react-stomp';
 
-function App() {
+const SOCKET_URL = 'http://localhost:8080/produce';
+
+const App = () => {
+  const [message, setMessage] = useState([]);
+
+  let onConnected = () => {
+    console.log("Connected!!")
+  }
+
+  let onMessageReceived = (msg) => {
+    console.log(msg)
+    setMessage(msg);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <SockJsClient
+        url={SOCKET_URL}
+        topics={['/topic/getProduce']}
+        onConnect={onConnected}
+        onDisconnect={console.log("Disconnected!")}
+        onMessage={msg => onMessageReceived(msg)}
+        debug={false}
+      />
+      <div className="table">
+      <table className="table-table">
+        <thead>
+          <tr>
+            <th>Produce Id</th>
+            <th>Weight</th>
+            <th>Farmer Id</th>
+            <th>Farmer Name</th>
+            <th>Clerk Id</th>
+            <th>Clerk Name</th>
+          </tr>
+        </thead>
+        {message != null && (
+          <tbody>
+            {message
+              .map((val, key) => {
+                return (
+                  <tr key={key}>
+                    <td>{val.produceid}</td>
+                    <td>{val.weight}</td>
+                    <td>{val.categoryid}</td>
+                    <td>{val.farmerid}</td>
+                    <td>{val.clerkid}</td>
+                    <td>{val.centerid}</td>
+                  </tr>
+                );
+              })}
+          </tbody>
+        )}
+      </table>
+    </div>
+      {/* <div>{message}</div> */}
     </div>
   );
 }
